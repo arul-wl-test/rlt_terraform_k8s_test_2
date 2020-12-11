@@ -35,6 +35,59 @@ This repo holds the application code and Dockerfile in the "application" directo
 * We would also like for you to tackle this as you would a production ready deployment. We understand that time may not permit production like deploys in all areas, in this scenario please note what you would do different in a production environment.
 
 
+# Implementation Steps   
+## Create GKE cluster   
+```   
+cd terraform   
+terraform init   
+terraform plan   
+terraform apply --auto-approve
+```   
+### Note   
+Due to hectic workload I forget to create remote back end for tfstate. Ideally we should create GCS bucket and configure that as terraform remote backend for tfstate file   
+
+## Create Docker Image   
+```   
+docker build --tag rts_test_app:1.0 .   
+docker build --tag rts_test_app:1.0 application/rlt-test/   
+docker tag rts_test_app:1.0 gcr.io/silken-network-252121/rts_test_app:1.0 
+docker push gcr.io/silken-network-252121/rts_test_app:1.3     
+```   
+### Note   
+silken-network-252121 is GCP project in my personal account   
+
+### Create certificates and certificate secret   
+```    
+Generate the CA Key and Certificate:
+openssl req -x509 -sha256 -newkey rsa:4096 -keyout ca.key -out ca.crt -days 356 -nodes -subj '/CN=My Cert Authority'
+
+Generate the Server Key, and Certificate and Sign with the CA Certificate:
+openssl req -new -newkey rsa:4096 -keyout server.key -out server.csr -nodes -subj '/CN=chart-example.local'
+openssl x509 -req -sha256 -days 365 -in server.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out server.crt
+
+Creating Certificate Secrets
+kubectl create secret generic ca-secret --from-file=tls.crt=server.crt --from-file=tls.key=server.key --from-file=ca.crt=ca.crt
+```   
+### Note   
+Use ca-secret as tls secretName in Ingress   
+
+## Deploy helm charts   
+### Configure Kubectl   
+```   
+gcloud container clusters get-credentials rlt-test-k8s 
+```   
+### Install Ingress controller   
+```  
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx   
+helm repo update   
+helm upgrade -i ingress-cont ingress-nginx/ingress-nginx    
+```   
+### Deploy application with helm command    
+```   
+helm upgrade -i --values=charts/rlt-test/values.yaml rlt-test-rel charts/rlt-test   
+```   
+   
+
 
 
 
