@@ -127,6 +127,19 @@ kubectl label namespace stg istio-injection=enabled
 kubectl label namespace prod istio-injection=enabled   
 ```   
 
+## Use FQDN for service   
+By default the cluster.local is the internal domain. To reach service from pods within the cluster    
+```   
+svc_name.namespace_name.cluster.local   
+rlt-test-rel.stg.cluster.local   
+rlt-test-rel.prod.cluster.local   
+```    
+
+## Stand up a second environment   
+Terraform script should be executed with different parameters for GCP project, GCP Region and with   different tfstate Back end bucket    
+
+
+
 
 
 
