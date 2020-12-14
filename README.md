@@ -97,10 +97,13 @@ Create Namesapces for stage and production
 kubectl create namespace stg   
 kubectl create namespace prod   
 ```   
+Create values.yaml per environment like     
+values_stg.yaml   
+values_prod.yaml    
 Deploy helm charts with namespace option    
 ```   
-helm upgrade -i --values=charts/rlt-test/values.yaml rlt-test-dev-rel charts/rlt-test -n stg    
-helm upgrade -i --values=charts/rlt-test/values.yaml rlt-test-prod-rel charts/rlt-test -n prod    
+helm upgrade -i --values=charts/rlt-test/values_stg.yaml rlt-test-dev-rel charts/rlt-test -n stg    
+helm upgrade -i --values=charts/rlt-test/values_prod.yaml rlt-test-prod-rel charts/rlt-test -n prod    
 ```   
 In automatted pipeline helmfile should be used to release in different environments   
 
