@@ -86,7 +86,49 @@ helm upgrade -i ingress-cont ingress-nginx/ingress-nginx
 ```   
 helm upgrade -i --values=charts/rlt-test/values.yaml rlt-test-rel charts/rlt-test   
 ```   
-   
+
+# Bonus Aditions   
+## Private cluster   
+Terraform is updated to create Private cluster    
+
+## Deploy multiple environments   
+Create Namesapces for stage and production   
+```   
+kubectl create namespace stg   
+kubectl create namespace prod   
+```   
+Deploy helm charts with namespace option    
+```   
+helm upgrade -i --values=charts/rlt-test/values.yaml rlt-test-dev-rel charts/rlt-test -n stg    
+helm upgrade -i --values=charts/rlt-test/values.yaml rlt-test-prod-rel charts/rlt-test -n prod    
+```   
+In automatted pipeline helmfile should be used to release in different environments   
+
+## Configure monitoring/alerts   
+```   
+kubectl create namespace monitoring
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts   
+helm repo add stable https://charts.helm.sh/stable    
+helm repo update    
+helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring    
+kubectl port-forward -n monitoring prometheus-prometheus-kube-prometheus-prometheus-0 9090    
+http://localhost:9090/graph    
+kubectl port-forward -n monitoring prometheus-grafana-56458b8759-ngtdw 3000    
+```   
+
+## Use istio    
+```    
+kubectl create namespace istio-system    
+curl -L https://istio.io/downloadIstio | sh -   
+cd istio-1.8.1   
+export PATH=$PWD/bin:$PATH   
+istioctl install --set profile=demo -y   
+kubectl label namespace stg istio-injection=enabled   
+kubectl label namespace prod istio-injection=enabled   
+```   
+
+
+
 
 
 
